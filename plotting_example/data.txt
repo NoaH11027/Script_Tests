@@ -1,0 +1,5 @@
+location	count1	count2
+HZ		100	193
+ES		514	289
+FP		70	137
+BH		31	187
