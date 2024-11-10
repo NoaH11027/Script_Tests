@@ -1,0 +1,5 @@
+execute the following for example1:
+
+gnuplot -p example1.gnu < data.txt
+
+
