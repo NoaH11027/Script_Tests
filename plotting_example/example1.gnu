@@ -1,7 +1,11 @@
-#!/usr/bin/gnuplot -c
+#!/usr/bin/gnuplot -persist
 #
 #
 # plotting the example1.gnu with the data.txt
+# execute the following by:
+#   gnuplot -p example1.gnu < data.txt
+#
+# data.txt must be present
 #
 #
 
