@@ -216,7 +216,7 @@ clear_logging () {
 
 parse_params() {
     # default values of variables set from params
-    flag=0
+    #flag=0
     param=''
 
     while :; do
