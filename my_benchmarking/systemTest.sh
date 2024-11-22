@@ -62,7 +62,8 @@ cat << EOF
 
     Maintenance options
 
-    -c, --clean             cleaning logs, archiving logs
+    -cs, --cleanstress      cleaning stress-ng logs, archiving logs
+    -ct, --cleanturbo		cleaning turbostat logs, archiving logs
     -nc, --no-colors        output without colors
     -p, --param             named parameter (not used yet)
 
@@ -125,9 +126,15 @@ cpu_base_stress_pattern () {
 }
 
 cpu_matrix_stressor () {
-	read -rp "number of cycles to complete:  " maxCount;
-	read -rp "time for every cycle to pass (in seconds):  " loadTime;
-	read -rp "load applied to the system (load higher 95 is not recommended:  " load;
+	maxCountDefault="15000";
+	read -rp "number oc cycles to complete [$maxCountDefault]:  " maxCount;
+	maxCount="${maxCount:-$maxCountDefault}";
+	loadTimeDefault="25";
+	read -rp "time for every cycle to pass (in seconds) [$loadTimeDefault]:  " loadTime; 
+	loadTime="${loadtime:-$loadTimeDefault}";
+	loadDefault="90";
+	read -rp "percent load applied to the system (load higher 95 is not recommended remotely) [$loadDefault]:  " load;
+	load="${load:-$loadDefault}";
 	echo
 	echo "processing matrix stressor for cpu stress for $maxCount cycle, with $loadTime seconds per cycle, with $load% load and $loadPause seconds pause between the cycles"
 	echo
@@ -144,24 +151,44 @@ cpu_matrix_stressor () {
 }
 
 cpu_int_methods_stressor () {
-	read -rp "number of cycles to complete:  " maxCount;
-	read -rp "time for every cycle to pass (in seconds):  " loadTime;
-	read -rp "load applied to the system (load higher 95 is not recommended:  " load;
+	maxCountDefault="15000";
+	read -rp "number oc cycles to complete [$maxCountDefault]:  " maxCount;
+	maxCount="${maxCount:-$maxCountDefault}";
+	loadTimeDefault="25";
+	read -rp "time for every cycle to pass (in seconds) [$loadTimeDefault]:  " loadTime; 
+	loadTime="${loadtime:-$loadTimeDefault}";
+	loadDefault="90";
+	read -rp "percent load applied to the system (load higher 95 is not recommended remotely) [$loadDefault]:  " load;
+	load="${load:-$loadDefault}";
+	echo
 	echo "processing several integer stress methods for $maxCount cycle, with $loadTime seconds per cycle, with $load% load and $loadPause seconds pause between the cycles"
 	while [ $cycle -lt "$maxCount" ];
 	do 	for method in int8 int16 int32 int64 int128;
 			do	stress-ng --cpu 0 --cpu-method "$method" -l "$load" -t "$loadTime" --stdout --thermalstat 2 --vmstat 10 --timestamp --metrics-brief --times >> ./logging/stress-ng_integerMethods_"$date"_"$cpu".log;
+			echo "current method cycle is: $method"
 		done;
 	done
 }
 
 memory_mmap_stressor  () {
-	read -rp "number of cycles to complete:  " maxCount;
-	read -rp "time for every cycle to pass (in seconds):  " loadTime;
-	read -rp "number of vm stressors (relate to processor):  " stressorVm;
-	read -rp "size of vm stressor in GByte (relate to memory available):  " numberVm;
-	read -rp "number of mmap stressors (relate to processor):  " stressorMm;
-	read -rp "size of mmap stressor in GByte (realte to memory avaialble):  " numberMm; 
+	maxCountDefault="15000";
+	read -rp "number of cycles to complete [$maxCountDefault]:  " maxCount;
+	maxCount="${maxCount:-$maxCountDefault}";
+	loadTimeDefault="25";
+	read -rp "time for every cycle to pass (in seconds) [$loadTimeDefault]:  " loadTime;
+	loadTime="${loadtime:-$loadTimeDefault}";
+	stressorVmDefault="2";
+	read -rp "number of vm stressors (relate to processor) [$stressorVmDefault]:  " stressorVm;
+	stressorVm="${stressorVm:-%stressorVmDefault}";
+	numberVmDefault="2";
+	read -rp "size of vm stressor in GByte (relate to memory available) [${numberVmDefault}G]:  " numberVm;
+	numberVm="${numberVm:-$numberVmDefault}";
+	stressorMnDefault="2";
+	read -rp "number of mmap stressors (relate to processor) [$stressorVmDefault]:  " stressorMm;
+	stressorMm="${stressorMm:-$stressorMnDefault}";
+	numberMnDefault="2";
+	read -rp "size of mmap stressor in GByte (realte to memory avaialble) [${numberMnDefault}G]:  " numberMm;
+	numberMm="${numberMm:-$numberMnDefault}";
 	echo
 	echo "processing memory stress with $stressorVm vm stressor using ${numberVm} GByte memory and $stressorMm mmap stressor using $numberMm GigyByte for $maxCount cycle, with $loadTime seconds per cycle, with $load percent load and $loadPause seconds pause between the cycles"
 	echo
@@ -178,8 +205,12 @@ memory_mmap_stressor  () {
 }
 
 hdd_base_stressor () {
-	read -rp "number of cycles to complete:  " maxCount;
-	read -rp "time for every cycle to pass (in seconds):  " loadTime;
+	maxCountDefault="15000";
+	read -rp "number oc cycles to complete [$maxCountDefault]:  " maxCount;
+	maxCount="${maxCount:-$maxCountDefault}";
+	loadTimeDefault="25";
+	read -rp "time for every cycle to pass (in seconds) [$loadTimeDefault]:  " loadTime; 
+	loadTime="${loadtime:-$loadTimeDefault}";
 	echo
 	echo "processing base hdd stressor for hdd stress for $maxCount cycle, with $loadTime seconds per cycle and $loadPause seconds pause between the cycles"
 	echo
@@ -196,9 +227,15 @@ hdd_base_stressor () {
 }
 
 random_all_stressor () {
-	read -rp "number of cycles to complete:  " maxCount;
-	read -rp "time for every cycle to pass (in seconds):  " loadTime;
-	read -rp "load applied to the system (load higher 95 is not recommended:  " load;
+	maxCountDefault="15000";
+	read -rp "number oc cycles to complete [$maxCountDefault]:  " maxCount;
+	maxCount="${maxCount:-$maxCountDefault}";
+	loadTimeDefault="25";
+	read -rp "time for every cycle to pass (in seconds) [$loadTimeDefault]:  " loadTime; 
+	loadTime="${loadtime:-$loadTimeDefault}";
+	loadDefault="90";
+	read -rp "percent load applied to the system (load higher 95 is not recommended remotely) [$loadDefault]:  " load;
+	load="${load:-$loadDefault}";
 	echo
 	echo "processing random stressor for cpu stress for $maxCount cycle, with $loadTime seconds per cycle, with $load% load and $loadPause seconds pause between the cycles"
 	echo
@@ -214,14 +251,24 @@ random_all_stressor () {
 	done
 }
 
-clear_logging () {
+clear_stress_logging () {
 	echo
-	echo "cleaning the logging directory and packing old logs and archiving them "
+	echo "cleaning the stress-ng logging and packing old logs and archiving them "
 	echo
 	sleep 2;
 	mkdir ./logging/archive;
 	tar cvjf ./logging/archive/"$date"_log_backup.tar.bz2 ./logging/stress*log;
 	rm -f ./logging/stress*log;
+}
+
+clear_turbo_logging () {
+	echo
+	echo "cleaning the stress-ng logging and packing old logs and archiving them "
+	echo
+	sleep 2;
+	mkdir ./logging/archive;
+	tar cvjf ./logging/archive/"$date"_log_backup.tar.bz2 ./logging/turbostat*log;
+	rm -f ./logging/turbostat*log;
 }
 
 Logging_into_logfile_verbose () {
@@ -233,7 +280,7 @@ Logging_into_logfile_verbose () {
 
 Logging_onto_terminal_verbose () {
 	echo	
-	echo "verbose turbostat logging will written into logfile"
+	echo "verbose turbostat logging will written onto terminal"
 	echo
 	turbostat --debug --quiet --show Time_Of_Day_Seconds,TSC_MHz,Bzy_MHz,Core,CPU,CPU%c1,C1%,CoreTmp,PkgTmp,PkgWatt,CorWatt,GFXWatt,RAMWatt --interval 2
 }
@@ -247,7 +294,7 @@ Logging_into_logfile_compact () {
 
 Logging_onto_terminal_compact () {
 	echo
-	echo "compact turbostat logging will written into logfile"
+	echo "compact turbostat logging will written onto terminal"
 	echo
 	turbostat --Summary --quiet --show Time_Of_Day_Seconds,TSC_MHz,Bzy_MHz,CoreTmp,PkgTmp,CorWatt,PkgWatt,GFXWatt --interval 2
 }
@@ -284,9 +331,12 @@ parse_params() {
         -r|--random)
             random_all_stressor
             ;;
-        -c|--clean)
-            clear_logging
-            ;;	
+        -cs|--cleanstress)
+            clear_stress_logging
+            ;;
+        -ct|--cleanturbo)
+        	clear_turbo_logging
+        	;;
         -nc|--no-color)
             NO_COLOR=1
             ;;
