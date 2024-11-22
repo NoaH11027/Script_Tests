@@ -69,7 +69,7 @@ cat << EOF
 
     Logging options
 
-    
+
 EOF
 exit
 }
@@ -218,6 +218,34 @@ clear_logging () {
 	rm -f ./logging/stress*log;
 }
 
+Logging_into_logfile_verbose () {
+	echo 	
+	echo "verbose turbostat logging will written into logfile"
+	echo
+	turbostat --debug --quiet --show Time_Of_Day_Seconds,TSC_MHz,Bzy_MHz,Core,CPU,CPU%c1,C1%,CoreTmp,PkgTmp,PkgWatt,CorWatt,GFXWatt,RAMWatt --out ./logging/turbostat_output_"$date"_"$cpu".log --interval 2
+}
+
+Logging_onto_terminal_verbose () {
+	echo	
+	echo "verbose turbostat logging will written into logfile"
+	echo
+	turbostat --debug --quiet --show Time_Of_Day_Seconds,TSC_MHz,Bzy_MHz,Core,CPU,CPU%c1,C1%,CoreTmp,PkgTmp,PkgWatt,CorWatt,GFXWatt,RAMWatt --interval 2
+}
+
+Logging_into_logfile_compact () {
+	echo
+	echo "compact turbostat logging will written into logfile"
+	echo
+	turbostat --Summary --quiet --show Time_Of_Day_Seconds,TSC_MHz,Bzy_MHz,CoreTmp,PkgTmp,CorWatt,PkgWatt,GFXWatt --out ./logging/turbostat_output_"$date"_"$cpu".log --interval 2
+}
+
+Logging_onto_terminal_compact () {
+	echo
+	echo "compact turbostat logging will written into logfile"
+	echo
+	turbostat --Summary --quiet --show Time_Of_Day_Seconds,TSC_MHz,Bzy_MHz,CoreTmp,PkgTmp,CorWatt,PkgWatt,GFXWatt --interval 2
+}
+
 
 parse_params() {
     # default values of variables set from params
@@ -261,6 +289,18 @@ parse_params() {
             param="${2-}"
             shift
             ;;
+        -lv|--logoutverbose)
+        	Logging_into_logfile_verbose
+        	;;
+        -sv|--screenoutverbose)
+			Logging_onto_terminal_verbose
+			;;
+		-lc|--logoutcompact)
+			Logging_into_logfile_compact
+			;;
+		-sc|--screenoutcompact)
+			Logging_onto_terminal_compact
+			;;
         -?*)
             die "Unknown option: $1"
             ;;
