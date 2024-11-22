@@ -100,9 +100,15 @@ die() {
 }
 
 cpu_base_stress_pattern () {
-	read -rp "number of cycles to complete:  " maxCount;
-	read -rp "time for every cycle to pass (in seconds):  " loadTime;
-	read -rp "percent load applied to the system (load higher 95 is not recommended remotely):  " load;
+	maxCountDefault="15000";
+	read -rp "number oc cycles to complete [$maxCountDefault]:  " maxCount;
+	maxCount="${maxCount:-$maxCountDefault}";
+	loadTimeDefault="25";
+	read -rp "time for every cycle to pass (in seconds) [$loadTimeDefault]:  " loadTime; 
+	loadTime="${loadtime:-$loadTimeDefault}";
+	loadDefault="90";
+	read -rp "percent load applied to the system (load higher 95 is not recommended remotely) [$loadDefault]:  " load;
+	load="${load:-$loadDefault}";
 	echo
 	echo "processing base cpu stress for $maxCount cycle, with $loadTime seconds per cycle, with $load% load and $loadPause seconds pause between the cycles"  
 	echo
