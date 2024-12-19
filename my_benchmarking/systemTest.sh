@@ -24,7 +24,8 @@
 timePassed=0
 loadPause=5
 date=$(date +%Y-%m-%d_%H-%M)
-cpu="$(lscpu | grep "Model Name" | awk -F" " '{ print $7 }')"
+# cpu="$(lscpu | grep "Model Name" | awk -F" " '{ print $7 }')"
+cpu="$(dmidecode -t 4 | grep "Family:" | awk -F" " '{ printf S2"_"S3 }')"
 cycle=1
 
 set -Eeuo pipefail
