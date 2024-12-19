@@ -24,7 +24,7 @@
 timePassed=0
 loadPause=5
 date=$(date +%Y-%m-%d_%H-%M)
-cpu="Core_i5"
+cpu="$(lscpu | grep "Model Name" | awk -F" " '{ print $7 }')"
 cycle=1
 
 set -Eeuo pipefail
