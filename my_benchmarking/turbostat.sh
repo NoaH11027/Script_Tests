@@ -12,7 +12,8 @@
 # ENVIRONMENT
 
 date=$(date +%Y-%m-%d)
-cpu="Core_i5"
+#cpu="Core_i5"
+cpu="$(lscpu | grep "Model Name" | awk -F" " '{ print $7 }')"
 
 touch ./logging/turbostat_output_"$date"_"$cpu".log
 chown vitronic:vitronic ./logging/turbostat_output_"$date"_"$cpu".log 
