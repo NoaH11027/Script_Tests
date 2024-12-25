@@ -309,36 +309,47 @@ parse_params() {
     while :; do
     case "${1-}" in
         -h|--help|-u|--usage)
+			# howto use thsi script
             usage
             ;;
         -v | --verbose)
+			# extend logging output for every function in thius script
             set -x
             ;;
         -cb|--cpubase)
             cpu_base_stress_pattern
+			# base stress pattern for the main cpu stressor
             ;;
         -cm|--cpumatrix)
             cpu_matrix_stressor
+			# more specific stress pattern, matrix stressor for floating point operations
             ;;
         -ci|--cpuinteger)
             cpu_int_methods_stressor
+			# more specific stress pattern, integer stressor for integer operations
             ;;	
         -m|--memory)
             memory_mmap_stressor
+			# stress pattern for memory stressor, using mmap and vm stressors
             ;;
         -d|--disk)
             hdd_base_stressor
+			# stress pattern for disk stressor, using hdd stressor
             ;;
         -r|--random)
+			# stress pattern vor the cpu stressor, using a random stressor set
             random_all_stressor
             ;;
         -cs|--cleanstress)
+			# clear the logging directory and archive existing logs for the stress-ng logs 
             clear_stress_logging
             ;;
         -ct|--cleanturbo)
         	clear_turbo_logging
+			# clear the logging directory and archive existing logs for the turbostat logs
         	;;
         -nc|--no-color)
+			# output without colors
             NO_COLOR=1
             ;;
         -p|--param)
@@ -347,19 +358,24 @@ parse_params() {
             shift
             ;;
         -lv|--logoutverbose)
+			# verbose output into logfile
         	Logging_into_logfile_verbose
         	;;
         -sv|--screenoutverbose)
+			# verbose output onto terminal
 			Logging_onto_terminal_verbose
 			;;
 		-lc|--logoutcompact)
+			# compact output into logfile
 			Logging_into_logfile_compact
 			;;
 		-sc|--screenoutcompact)
+			# compact output onto terminal
 			Logging_onto_terminal_compact
 			;;
         -?*)
             die "Unknown option: $1"
+			# fallback for unknown options
             ;;
         *)
             break
