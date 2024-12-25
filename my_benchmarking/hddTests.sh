@@ -76,12 +76,12 @@ die() {
     exit "$code"
 }
 
-qd32_bigblock_read() {
+qd32_bigblock_read () {
     # Sequential READ speed with big blocks QD32 (this should be near the number you see in the specifications for your drive)
     fio --name TEST --eta-newline=5s --filename=fio-tempfile.dat --rw=read --size=500m --io_size=10g --blocksize=1024k --ioengine=libaio --fsync=10000 --iodepth=32 --direct=1 --numjobs=1 --runtime=60 --group_reporting
 }
 
-qd32_bigblock_write() {
+qd32_bigblock_write () {
     # Sequential WRITE speed with big blocks QD32 (this should be near the number you see in the specifications for your drive)
     fio --name TEST --eta-newline=5s --filename=fio-tempfile.dat --rw=write --size=500m --io_size=10g --blocksize=1024k --ioengine=libaio --fsync=10000 --iodepth=32 --direct=1 --numjobs=1 --runtime=60 --group_reporting
 }
@@ -104,3 +104,54 @@ qd1_random4K_readwrite () {
 # The Intel 905p can do above "Mixed random 4K read and write QD1 with sync" test with following performance:[r=149MiB/s,w=149MiB/s][r=38.2k,w=38.1k IOPS]. If you try that on any other but Optane level hardware, your performance will be A LOT less. Closer to 100 IOPS instead of 38000 IOPS like Optane can do.
 #
 
+
+parse_params() {
+    # default values of variables set from params
+    #flag=0
+    param=''
+
+    while :; do
+    case "${1-}" in
+        -h|--help|-u|--usage)
+			# howto use thsi script
+            usage
+            ;;
+        -v | --verbose)
+			# extend logging output for every function in thius script
+            set -x
+            ;;
+        -qr|--qdread)
+            qd32_bigblock_read
+			# base stress pattern for the main cpu stressor
+            ;;
+        -qw|--qdwrite)
+            qd32_bigblock_write
+			# more specific stress pattern, matrix stressor for floating point operations
+            ;;
+        -mr|--qdmixed)
+            d1_random4K_read
+			# more specific stress pattern, integer stressor for integer operations
+            ;;
+        -rw|--qdrw)
+            qd1_random4K_readwrite
+			# more specific stress pattern, integer stressor for integer operations
+            ;;	           	
+        -?*)
+            die "Unknown option: $1"
+			# fallback for unknown options
+            ;;
+        *)
+            break
+            ;;
+    esac
+        shift
+    done
+
+    args=("$@")
+
+    # check required params and arguments
+    [[ -z "${param-}" ]] && die "Missing required parameter: param"
+    [[ ${#args[@]} -eq 0 ]] && die "Missing script arguments"
+
+    return 0
+}
