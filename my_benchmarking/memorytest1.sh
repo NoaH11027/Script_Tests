@@ -18,11 +18,7 @@
 #
 #############################################################################################################
 
-set -Eeuo pipefail
-trap cleanup SIGINT SIGTERM ERR EXIT
 
-# shellcheck disable=SC2034
-script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 
 #############################################################################################################
 #
@@ -30,9 +26,42 @@ script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 #
 #############################################################################################################
 
-cleanup () {
-    trap - SIGINT SIGTERM ERR EXIT
-    # script cleanup here
+usage () {
+
+cat << EOF
+ 
+    Usage: $(basename "${BASH_SOURCE[0]}") [-h] [-v] [-f] -p param_value arg1 [arg2...]
+
+    Script description here.
+
+    Base options:
+
+    -h, --help
+    -u, --usage             Print this help and exit
+    -v, --verbose           Print script debug info
+
+    System stress options
+
+    -cb, --cpubase          CPU stress, basic stressors      
+    -cm, --cpumatrix        CPU stress, matrix stressors
+    -ci, --cpuinteger       CPU stress, integer stressors
+    -m, --memory            Memory stress, mmap and vm stressors
+    -d, --disk              Disk stress, different disk stressors
+    -r, --random            System stress, random stressors
+
+    Maintenance options
+
+    -cs, --cleanstress      cleaning stress-ng logs, archiving logs
+    -ct, --cleanturbo		cleaning turbostat logs, archiving logs
+    -nc, --no-colors        output without colors
+    -p, --param             named parameter (not used yet)
+
+
+    Logging options
+
+
+EOF
+exit
 }
 
 setup_colors () {
@@ -42,17 +71,6 @@ setup_colors () {
         # shellcheck disable=SC2034
         NOFORMAT='' RED='' GREEN='' ORANGE='' BLUE='' PURPLE='' CYAN='' YELLOW=''
     fi
-}
-
-msg () {
-    echo >&2 -e "${1-}"
-}
-
-die () {
-    local msg=$1
-    local code=${2-1} # default exit status 1
-    msg "$msg"
-    exit "$code"
 }
 
 memory_writing_test () {
@@ -65,37 +83,22 @@ memory_reading_test () {
     sysbench memory --memory-block-size=1G --memory-total-size=20G --memory-oper=read run
 }
 
-parse_params() {
-    # default values of variables set from params
-    #flag=0
-    param=''
 
-    while :; do
-    case "${1-}" in
-        -mr|--memread)
-            memory_reading_test
-			# memory reading test, 1GB blocks, 20GB total size
-            ;;
-        -mw|--memwrite)
-            memory_writing_test
-			# memory writing test, 1GB blocks, 20GB total size
-            ;;
-        -?*)
-            die "Unknown option: $1"
-			# fallback for unknown options
-            ;;
-        *)
-            break
-            ;;
-    esac
-        shift
-    done
-
-    args=("$@")
-
-    # check required params and arguments
-    [[ -z "${param-}" ]] && die "Missing required parameter: param"
-    [[ ${#args[@]} -eq 0 ]] && die "Missing script arguments"
-
-    return 0
-}            
+case "$1" in
+    -mr|--memread)
+        memory_reading_test
+        # memory reading test, 1GB blocks, 20GB total size
+        ;;
+    -mw|--memwrite)
+        memory_writing_test
+        # memory writing test, 1GB blocks, 20GB total size
+        ;;
+    *)
+		echo		
+		echo "'$1' is an invalid argument!"
+		usage
+		exit 2
+        # break
+		;;
+esac
+ 

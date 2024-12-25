@@ -14,11 +14,6 @@
 #
 #############################################################################################################
 
-set -Eeuo pipefail
-trap cleanup SIGINT SIGTERM ERR EXIT
-
-# shellcheck disable=SC2034
-script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 
 #############################################################################################################
 #
@@ -51,31 +46,6 @@ EOF
 exit
 }
 
-cleanup () {
-    trap - SIGINT SIGTERM ERR EXIT
-    # script cleanup here
-}
-
-setup_colors () {
-    if [[ -t 2 ]] && [[ -z "${NO_COLOR-}" ]] && [[ "${TERM-}" != "dumb" ]]; then
-        NOFORMAT='\033[0m' RED='\033[0;31m' GREEN='\033[0;32m' ORANGE='\033[0;33m' BLUE='\033[0;34m' PURPLE='\033[0;35m' CYAN='\033[0;36m' YELLOW='\033[1;33m'
-    else
-        # shellcheck disable=SC2034
-        NOFORMAT='' RED='' GREEN='' ORANGE='' BLUE='' PURPLE='' CYAN='' YELLOW=''
-    fi
-}
-
-msg () {
-    echo >&2 -e "${1-}"
-}
-
-die () {
-    local msg=$1
-    local code=${2-1} # default exit status 1
-    msg "$msg"
-    exit "$code"
-}
-
 qd32_bigblock_read () {
     # Sequential READ speed with big blocks QD32 (this should be near the number you see in the specifications for your drive)
     fio --name TEST --eta-newline=5s --filename=fio-tempfile.dat --rw=read --size=500m --io_size=10g --blocksize=1024k --ioengine=libaio --fsync=10000 --iodepth=32 --direct=1 --numjobs=1 --runtime=60 --group_reporting
@@ -105,53 +75,36 @@ qd1_random4K_readwrite () {
 #
 
 
-parse_params() {
-    # default values of variables set from params
-    #flag=0
-    param=''
+case "$1" in
+    -h|--help|-u|--usage)
+        # howto use thsi script
+        usage
+        ;;
+    -v | --verbose)
+        # extend logging output for every function in thius script
+        set -x
+        ;;
+    -qr|--qdread)
+        qd32_bigblock_read
+        # base stress pattern for the main cpu stressor
+        ;;
+    -qw|--qdwrite)
+        qd32_bigblock_write
+        # more specific stress pattern, matrix stressor for floating point operations
+        ;;
+    -mr|--qdmixed)
+        d1_random4K_read
+        # more specific stress pattern, integer stressor for integer operations
+        ;;
+    -rw|--qdrw)
+        qd1_random4K_readwrite
+        # more specific stress pattern, integer stressor for integer operations
+        ;;
+    *)
+		echo		
+		echo "'$1' is an invalid argument!"
+		usage
+		# exit 2
+		;;	           	
+esac
 
-    while :; do
-    case "${1-}" in
-        -h|--help|-u|--usage)
-			# howto use thsi script
-            usage
-            ;;
-        -v | --verbose)
-			# extend logging output for every function in thius script
-            set -x
-            ;;
-        -qr|--qdread)
-            qd32_bigblock_read
-			# base stress pattern for the main cpu stressor
-            ;;
-        -qw|--qdwrite)
-            qd32_bigblock_write
-			# more specific stress pattern, matrix stressor for floating point operations
-            ;;
-        -mr|--qdmixed)
-            d1_random4K_read
-			# more specific stress pattern, integer stressor for integer operations
-            ;;
-        -rw|--qdrw)
-            qd1_random4K_readwrite
-			# more specific stress pattern, integer stressor for integer operations
-            ;;	           	
-        -?*)
-            die "Unknown option: $1"
-			# fallback for unknown options
-            ;;
-        *)
-            break
-            ;;
-    esac
-        shift
-    done
-
-    args=("$@")
-
-    # check required params and arguments
-    [[ -z "${param-}" ]] && die "Missing required parameter: param"
-    [[ ${#args[@]} -eq 0 ]] && die "Missing script arguments"
-
-    return 0
-}
