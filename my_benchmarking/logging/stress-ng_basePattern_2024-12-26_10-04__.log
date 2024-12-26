@@ -1,0 +1,43 @@
+stress-ng: 10:05:11.32 info:  [18114] setting to a 25 secs run per stressor
+stress-ng: 10:05:11.33 info:  [18114] dispatching hogs: 12 cpu
+stress-ng: 10:05:11.33 info:  [18116] cpu: for stable load results, select a specific cpu stress method with --cpu-method other than 'all'
+stress-ng: 10:05:11.33 info:  [18117] cpu: for stable load results, select a specific cpu stress method with --cpu-method other than 'all'
+stress-ng: 10:05:11.33 info:  [18118] cpu: for stable load results, select a specific cpu stress method with --cpu-method other than 'all'
+stress-ng: 10:05:11.33 info:  [18119] cpu: for stable load results, select a specific cpu stress method with --cpu-method other than 'all'
+stress-ng: 10:05:11.33 info:  [18121] cpu: for stable load results, select a specific cpu stress method with --cpu-method other than 'all'
+stress-ng: 10:05:11.33 info:  [18120] cpu: for stable load results, select a specific cpu stress method with --cpu-method other than 'all'
+stress-ng: 10:05:11.33 info:  [18122] cpu: for stable load results, select a specific cpu stress method with --cpu-method other than 'all'
+stress-ng: 10:05:11.33 info:  [18123] cpu: for stable load results, select a specific cpu stress method with --cpu-method other than 'all'
+stress-ng: 10:05:11.33 info:  [18124] cpu: for stable load results, select a specific cpu stress method with --cpu-method other than 'all'
+stress-ng: 10:05:11.33 info:  [18125] cpu: for stable load results, select a specific cpu stress method with --cpu-method other than 'all'
+stress-ng: 10:05:11.33 info:  [18126] cpu: for stable load results, select a specific cpu stress method with --cpu-method other than 'all'
+stress-ng: 10:05:11.34 info:  [18127] cpu: for stable load results, select a specific cpu stress method with --cpu-method other than 'all'
+stress-ng: 10:05:13.33 info:  [18115] therm: AvGHz MnGHz MxGHz  LdA1  LdA5 LdA15    B0D4 INT340   NGFF   TMEM   TSKN   TVGA acpitz iwlwif pch_ca x86_pk
+stress-ng: 10:05:13.34 info:  [18115] therm:  3.27  0.80  4.10  1.00  0.72  0.65   84.05  20.00  35.05  46.05  47.05  49.05  25.00  34.00  58.00  89.00
+stress-ng: 10:05:15.35 info:  [18115] therm:  3.28  0.80  4.10  1.00  0.72  0.65   92.05  20.00  35.05  46.05  50.05  51.05  25.00  34.00  57.00  94.00
+stress-ng: 10:05:17.35 info:  [18115] therm:  3.52  0.80  4.10  1.00  0.72  0.65   95.05  20.00  35.05  46.05  52.05  53.05  25.00  34.00  57.00  97.00
+stress-ng: 10:05:19.34 info:  [18115] therm:  4.09  4.06  4.11  1.40  0.81  0.68   94.05  20.00  35.05  46.05  54.05  55.05  25.00  34.00  56.00  99.00
+stress-ng: 10:05:21.33 info:  [18115] vmstat:   r   b      swpd      free      buff     cache   si   so     bi     bo   in   cs us sy id wa st
+stress-ng: 10:05:21.33 info:  [18115] vmstat:   6   0         0  21276572   1110148   5388952    0    0    244     84 8496 3996 46  0 54  0  0
+stress-ng: 10:05:21.34 info:  [18115] therm:  3.55  0.80  4.10  1.40  0.81  0.68   95.05  20.00  35.05  46.05  55.05  56.05  25.00  34.00  58.00  97.00
+stress-ng: 10:05:23.34 info:  [18115] therm:  3.28  0.80  4.11  1.93  0.93  0.72   96.05  20.00  35.05  46.05  56.05  57.05  25.00  34.00  57.00  95.00
+stress-ng: 10:05:25.34 info:  [18115] therm:  3.79  3.67  3.87  1.93  0.93  0.72   96.05  20.00  35.05  46.05  57.05  58.05  25.00  34.00  56.00  99.00
+stress-ng: 10:05:27.34 info:  [18115] therm:  3.54  0.80  3.90  1.93  0.93  0.72   97.05  20.00  35.05  46.05  58.05  58.05  25.00  34.00  55.00  94.00
+stress-ng: 10:05:29.35 info:  [18115] therm:  3.75  3.60  3.80  2.17  0.99  0.75   96.05  20.00  35.05  46.05  59.05  59.05  25.00  34.00  56.00  98.00
+stress-ng: 10:05:31.33 info:  [18115] vmstat:   9   0         0  21314024   1110148   5347892    0    0      0     51 9040 3563 45  0 54  0  0
+stress-ng: 10:05:31.35 info:  [18115] therm:  3.78  3.63  3.80  2.17  0.99  0.75   97.05  20.00  35.05  46.05  59.05  59.05  25.00  34.00  58.00  98.00
+stress-ng: 10:05:33.34 info:  [18115] therm:  3.70  3.63  3.73  2.32  1.04  0.76   97.05  20.00  35.05  46.05  60.05  60.05  25.00  34.00  55.00  92.00
+stress-ng: 10:05:35.34 info:  [18115] therm:  3.70  3.70  3.70  2.32  1.04  0.76   97.05  20.00  35.05  46.05  61.05  60.05  25.00  34.00  57.00  99.00
+stress-ng: 10:05:36.40 info:  [18114] for a 25.07s run time:
+stress-ng: 10:05:36.40 info:  [18114]     300.79s available CPU time
+stress-ng: 10:05:36.40 info:  [18114]     135.14s user time   ( 44.93%)
+stress-ng: 10:05:36.40 info:  [18114]       0.08s system time (  0.03%)
+stress-ng: 10:05:36.40 info:  [18114]     135.22s total time  ( 44.95%)
+stress-ng: 10:05:36.40 info:  [18114] load average: 2.32 1.04 0.76
+stress-ng: 10:05:36.40 info:  [18114] skipped: 0
+stress-ng: 10:05:36.40 info:  [18114] passed: 12: cpu (12)
+stress-ng: 10:05:36.40 info:  [18114] failed: 0
+stress-ng: 10:05:36.40 info:  [18114] metrics untrustworthy: 0
+stress-ng: 10:05:36.40 info:  [18114] successful run completed in 25.07 secs
+Schleife:   1
+Zeit vergangen seit Start:   0

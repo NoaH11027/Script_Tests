@@ -1,3 +1,11 @@
+#!/bin/bash
+
+cpu="$(dmidecode -t 4 | grep "Family:" | awk -F" " '{ printf $2"_"$3 }')"
+echo "$cpu"
+
+
+
+
 #maxCountDefault="15000"
 #read -rp "number oc cycles to complete [$maxCountDefault]:  " maxCount
 #maxCount="${maxCount:-$maxCountDefault}"

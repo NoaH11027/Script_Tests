@@ -17,34 +17,53 @@
 #
 ############################################################
 
+############################################################
 #
 #   ENVIRONMENT & VARIABLES
-##
+#
+############################################################
 
 timePassed=0
+# base value to start the time counting with
+
 loadPause=5
+# pause between the stress cycles. NOT CONFIGURABLE YET
+
 date=$(date +%Y-%m-%d_%H-%M)
+# formated date utilized in the logging
+
 # cpu="$(lscpu | grep "Model Name" | awk -F" " '{ print $7 }')"
-cpu="$(dmidecode -t 4 | grep "Family:" | awk -F" " '{ printf S2"_"S3 }')"
+cpu="$(dmidecode -t 4 | grep "Family:" | awk -F" " '{ printf $2"_"$3 }')"
+# cpu type determination used in the logging
+
 cycle=1
+# base value to start the cycle counting with
 
-set -Eeuo pipefail
-trap cleanup SIGINT SIGTERM ERR EXIT
+dir="./logging"
+if [[ ! -e $dir ]]; then
+    mkdir $dir
+elif [[ ! -d $dir ]]; then
+    echo "$dir already exists but is not a directory" 1>&2
+fi
+# check if logging directory exists and create it if not
 
-# shellcheck disable=SC2034
-script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 
+
+############################################################
 #
 #   FUNCTIONS
-##
+#
+############################################################
 
 usage () {
 
 cat << EOF
  
-    Usage: $(basename "${BASH_SOURCE[0]}") [-h] [-v] [-f] -p param_value arg1 [arg2...]
+    Usage: $(basename "${BASH_SOURCE[0]}") [-h] [-v] [-cb] [-cm] [-ci] [-m] [-d] [-r] [-cs] [-ct] [-nc] [-p]
 
-    Script description here.
+	Main script to determine the health and function of several system components like cpu,
+	memory and disk drive.
+	Can also be used in comparisant to alternative systems
 
     Base options:
 
@@ -64,7 +83,7 @@ cat << EOF
     Maintenance options
 
     -cs, --cleanstress      cleaning stress-ng logs, archiving logs
-    -ct, --cleanturbo		cleaning turbostat logs, archiving logs
+    -ct, --cleanturbo	    cleaning turbostat logs, archiving logs
     -nc, --no-colors        output without colors
     -p, --param             named parameter (not used yet)
 
@@ -73,32 +92,7 @@ cat << EOF
 
 
 EOF
-exit
-}
-
-cleanup () {
-    trap - SIGINT SIGTERM ERR EXIT
-    # script cleanup here
-}
-
-setup_colors () {
-    if [[ -t 2 ]] && [[ -z "${NO_COLOR-}" ]] && [[ "${TERM-}" != "dumb" ]]; then
-        NOFORMAT='\033[0m' RED='\033[0;31m' GREEN='\033[0;32m' ORANGE='\033[0;33m' BLUE='\033[0;34m' PURPLE='\033[0;35m' CYAN='\033[0;36m' YELLOW='\033[1;33m'
-    else
-        # shellcheck disable=SC2034
-        NOFORMAT='' RED='' GREEN='' ORANGE='' BLUE='' PURPLE='' CYAN='' YELLOW=''
-    fi
-}
-
-msg () {
-    echo >&2 -e "${1-}"
-}
-
-die () {
-    local msg=$1
-    local code=${2-1} # default exit status 1
-    msg "$msg"
-    exit "$code"
+# exit
 }
 
 cpu_base_stress_pattern () {
@@ -301,94 +295,79 @@ Logging_onto_terminal_compact () {
 }
 
 
-parse_params() {
-    # default values of variables set from params
-    #flag=0
-    param=''
+############################################################
+#
+#   MAIN
+#
+############################################################
 
-    while :; do
-    case "${1-}" in
-        -h|--help|-u|--usage)
-			# howto use thsi script
-            usage
-            ;;
-        -v | --verbose)
-			# extend logging output for every function in thius script
-            set -x
-            ;;
-        -cb|--cpubase)
-            cpu_base_stress_pattern
-			# base stress pattern for the main cpu stressor
-            ;;
-        -cm|--cpumatrix)
-            cpu_matrix_stressor
-			# more specific stress pattern, matrix stressor for floating point operations
-            ;;
-        -ci|--cpuinteger)
-            cpu_int_methods_stressor
-			# more specific stress pattern, integer stressor for integer operations
-            ;;	
-        -m|--memory)
-            memory_mmap_stressor
-			# stress pattern for memory stressor, using mmap and vm stressors
-            ;;
-        -d|--disk)
-            hdd_base_stressor
-			# stress pattern for disk stressor, using hdd stressor
-            ;;
-        -r|--random)
-			# stress pattern vor the cpu stressor, using a random stressor set
-            random_all_stressor
-            ;;
-        -cs|--cleanstress)
-			# clear the logging directory and archive existing logs for the stress-ng logs 
-            clear_stress_logging
-            ;;
-        -ct|--cleanturbo)
-        	clear_turbo_logging
-			# clear the logging directory and archive existing logs for the turbostat logs
-        	;;
-        -nc|--no-color)
-			# output without colors
-            NO_COLOR=1
-            ;;
-        -p|--param)
-            # example named parameter
-            param="${2-}"
-            shift
-            ;;
-        -lv|--logoutverbose)
-			# verbose output into logfile
-        	Logging_into_logfile_verbose
-        	;;
-        -sv|--screenoutverbose)
-			# verbose output onto terminal
-			Logging_onto_terminal_verbose
-			;;
-		-lc|--logoutcompact)
-			# compact output into logfile
-			Logging_into_logfile_compact
-			;;
-		-sc|--screenoutcompact)
-			# compact output onto terminal
-			Logging_onto_terminal_compact
-			;;
-        -?*)
-            die "Unknown option: $1"
-			# fallback for unknown options
-            ;;
-        *)
-            break
-            ;;
-    esac
-        shift
-    done
-
-    args=("$@")
-
-    # check required params and arguments
-    [[ -z "${param-}" ]] && die "Missing required parameter: param"
-    [[ ${#args[@]} -eq 0 ]] && die "Missing script arguments"
-
-    return 0
+# check for root permissions
+[ "$(id -u)" != "0" ] && { 
+	echo "root permissions are required to execute the script!" > /dev/stderr; exit 1;
 }
+
+case "$1" in
+	-h|--help|-u|--usage)
+		# howto use thsi script
+		usage
+		;;
+	-v | --verbose)
+		# extend logging output for every function in thius script
+		set -x
+		;;
+	-cb|--cpubase)
+		cpu_base_stress_pattern
+		# base stress pattern for the main cpu stressor
+		;;
+	-cm|--cpumatrix)
+		cpu_matrix_stressor
+		# more specific stress pattern, matrix stressor for floating point operations
+		;;
+	-ci|--cpuinteger)
+		cpu_int_methods_stressor
+		# more specific stress pattern, integer stressor for integer operations
+		;;	
+	-m|--memory)
+		memory_mmap_stressor
+		# stress pattern for memory stressor, using mmap and vm stressors
+		;;
+	-d|--disk)
+		hdd_base_stressor
+		# stress pattern for disk stressor, using hdd stressor
+		;;
+	-r|--random)
+		# stress pattern vor the cpu stressor, using a random stressor set
+		random_all_stressor
+		;;
+	-cs|--cleanstress)
+		# clear the logging directory and archive existing logs for the stress-ng logs 
+		clear_stress_logging
+		;;
+	-ct|--cleanturbo)
+		clear_turbo_logging
+		# clear the logging directory and archive existing logs for the turbostat logs
+		;;
+	-lv|--logoutverbose)
+		# verbose output into logfile
+		Logging_into_logfile_verbose
+		;;
+	-sv|--screenoutverbose)
+		# verbose output onto terminal
+		Logging_onto_terminal_verbose
+		;;
+	-lc|--logoutcompact)
+		# compact output into logfile
+		Logging_into_logfile_compact
+		;;
+	-sc|--screenoutcompact)
+		# compact output onto terminal
+		Logging_onto_terminal_compact
+		;;
+    *)
+		echo		
+		echo "'$1' is an invalid argument!"
+		usage
+		exit 2
+		;;	    
+esac
+
