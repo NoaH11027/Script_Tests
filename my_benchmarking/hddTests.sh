@@ -25,15 +25,14 @@ usage () {
 
 cat << EOF
  
-    Usage: $(basename "${BASH_SOURCE[0]}") [-h] [-v] [-f] -p param_value arg1 [arg2...]
+    Usage: $(basename "${BASH_SOURCE[0]}") [-h] [-u] [-qr] [-qw] [-mr] [-rw]
 
-    Test script to check disk drive performance.
+    Test script to measure memory read/write throughput utilizing fio.
 
     Base options:
 
     -h, --help
     -u, --usage           Print this help and exit
-    -v, --verbose         Print script debug info
 
     System stress options
 
@@ -48,20 +47,24 @@ exit
 
 qd32_bigblock_read () {
     # Sequential READ speed with big blocks QD32 (this should be near the number you see in the specifications for your drive)
-    fio --name TEST --eta-newline=5s --filename=fio-tempfile.dat --rw=read --size=500m --io_size=10g --blocksize=1024k --ioengine=libaio --fsync=10000 --iodepth=32 --direct=1 --numjobs=1 --runtime=60 --group_reporting
+    fio --name TEST --eta-newline=2s --filename=fio-tempfile.dat --rw=read --size=500m --io_size=10g --blocksize=1024k --ioengine=libaio --fsync=1 --iodepth=32 --direct=1 --numjobs=1 --runtime=60 --group_reporting
+    rm fio-tempfile.dat
 }
 
 qd32_bigblock_write () {
     # Sequential WRITE speed with big blocks QD32 (this should be near the number you see in the specifications for your drive)
-    fio --name TEST --eta-newline=5s --filename=fio-tempfile.dat --rw=write --size=500m --io_size=10g --blocksize=1024k --ioengine=libaio --fsync=10000 --iodepth=32 --direct=1 --numjobs=1 --runtime=60 --group_reporting
+    fio --name TEST --eta-newline=2s --filename=fio-tempfile.dat --rw=write --size=500m --io_size=10g --blocksize=1024k --ioengine=libaio --fsync=1 --iodepth=32 --direct=1 --numjobs=1 --runtime=60 --group_reporting
+    rm fio-tempfile.dat
 }
 qd1_random4K_read () {
     # Random 4K read QD1 (this is the number that really matters for real world performance unless you know better for sure)
-    fio --name TEST --eta-newline=5s --filename=fio-tempfile.dat --rw=randread --size=500m --io_size=10g --blocksize=4k --ioengine=libaio --fsync=1 --iodepth=1 --direct=1 --numjobs=1 --runtime=60 --group_reporting
+    fio --name TEST --eta-newline=2s --filename=fio-tempfile.dat --rw=randread --size=500m --io_size=10g --blocksize=4k --ioengine=libaio --fsync=1 --iodepth=1 --direct=1 --numjobs=1 --runtime=60 --group_reporting
+    rm fio-tempfile.dat
 }
 qd1_random4K_readwrite () {
     # Mixed random 4K read and write QD1 with sync (this is worst case performance you should ever expect from your drive, usually less than 1% of the numbers listed in the spec sheet)
-    fio --name TEST --eta-newline=5s --filename=fio-tempfile.dat --rw=randrw --size=500m --io_size=10g --blocksize=4k --ioengine=libaio --fsync=1 --iodepth=1 --direct=1 --numjobs=1 --runtime=60 --group_reporting
+    fio --name TEST --eta-newline=2s --filename=fio-tempfile.dat --rw=randrw --size=500m --io_size=10g --blocksize=4k --ioengine=libaio --fsync=1 --iodepth=1 --direct=1 --numjobs=1 --runtime=60 --group_reporting
+    rm fio-tempfile.dat
 }
 
 # Increase the --size argument to increase the file size. Using bigger files may reduce the numbers you get depending on drive technology and firmware. Small files will give "too good" results for rotational media because the read head does not need to move that much. If your device is near empty, using file big enough to almost fill the drive will get you the worst case behavior for each test. In case of SSD, the file size does not matter that much.
@@ -75,14 +78,19 @@ qd1_random4K_readwrite () {
 #
 
 
+#############################################################################################################
+#
+#
+#  MAIN
+#
+#
+#############################################################################################################
+
+
 case "$1" in
     -h|--help|-u|--usage)
         # howto use thsi script
         usage
-        ;;
-    -v | --verbose)
-        # extend logging output for every function in thius script
-        set -x
         ;;
     -qr|--qdread)
         qd32_bigblock_read
@@ -93,7 +101,7 @@ case "$1" in
         # more specific stress pattern, matrix stressor for floating point operations
         ;;
     -mr|--qdmixed)
-        d1_random4K_read
+        qd1_random4K_read
         # more specific stress pattern, integer stressor for integer operations
         ;;
     -rw|--qdrw)
