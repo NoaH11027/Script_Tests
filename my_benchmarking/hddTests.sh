@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-############################################################################################################
+############################################################
 #
 # SSD Performance Measurement
 #
@@ -8,18 +8,32 @@
 #
 # Mark Lüthke
 #
-############################################################################################################
+############################################################
 #
 #   ENVIRONMENT & VARIABLES
 #
-#############################################################################################################
+############################################################
 
+date=$(date +%Y-%m-%d_%H-%M)
+# formated date utilized in the logging
 
-#############################################################################################################
+# cpu="$(lscpu | grep "Model Name" | awk -F" " '{ print $7 }')"
+cpu="$(dmidecode -t 4 | grep "Family:" | awk -F" " '{ printf $2"_"$3 }')"
+# cpu type determination used in the logging
+
+dir="./logging"
+if [[ ! -e $dir ]]; then
+    mkdir $dir
+elif [[ ! -d $dir ]]; then
+    echo "$dir already exists but is not a directory" 1>&2
+fi
+# check if logging directory exists and create it if not
+
+############################################################
 #
 #   FUNCTIONS
 #
-#############################################################################################################
+############################################################
 
 usage () {
 
@@ -47,23 +61,23 @@ EOF
 
 qd32_bigblock_read () {
     # Sequential READ speed with big blocks QD32 (this should be near the number you see in the specifications for your drive)
-    fio --name TEST --eta-newline=2s --filename=fio-tempfile.dat --rw=read --size=500m --io_size=10g --blocksize=1024k --ioengine=libaio --fsync=1 --iodepth=32 --direct=1 --numjobs=1 --runtime=60 --group_reporting
+    fio --name TEST --eta-newline=2s --filename=fio-tempfile.dat --rw=read --size=500m --io_size=10g --blocksize=1024k --ioengine=libaio --fsync=10000 --iodepth=32 --direct=1 --numjobs=1 --runtime=60 --time_based --group_reporting --output=./logging/"$date"_fioQD32read_"$cpu".log
     rm fio-tempfile.dat
 }
 
 qd32_bigblock_write () {
     # Sequential WRITE speed with big blocks QD32 (this should be near the number you see in the specifications for your drive)
-    fio --name TEST --eta-newline=2s --filename=fio-tempfile.dat --rw=write --size=500m --io_size=10g --blocksize=1024k --ioengine=libaio --fsync=1 --iodepth=32 --direct=1 --numjobs=1 --runtime=60 --group_reporting
+    fio --name TEST --eta-newline=2s --filename=fio-tempfile.dat --rw=write --size=500m --io_size=10g --blocksize=1024k --ioengine=libaio --fsync=10000 --iodepth=32 --direct=1 --numjobs=1 --runtime=60 --time_based --group_reporting --output=./logging/"$date"_fioQD32write_"$cpu".log
     rm fio-tempfile.dat
 }
 qd1_random4K_read () {
     # Random 4K read QD1 (this is the number that really matters for real world performance unless you know better for sure)
-    fio --name TEST --eta-newline=2s --filename=fio-tempfile.dat --rw=randread --size=500m --io_size=10g --blocksize=4k --ioengine=libaio --fsync=1 --iodepth=1 --direct=1 --numjobs=1 --runtime=60 --group_reporting
+    fio --name TEST --eta-newline=2s --filename=fio-tempfile.dat --rw=randread --size=500m --io_size=10g --blocksize=4k --ioengine=libaio --fsync=1 --iodepth=1 --direct=1 --numjobs=1 --runtime=60 --group_reporting --output=./logging/"$date"_fioQD1random4Kr_"$cpu".log
     rm fio-tempfile.dat
 }
 qd1_random4K_readwrite () {
     # Mixed random 4K read and write QD1 with sync (this is worst case performance you should ever expect from your drive, usually less than 1% of the numbers listed in the spec sheet)
-    fio --name TEST --eta-newline=2s --filename=fio-tempfile.dat --rw=randrw --size=500m --io_size=10g --blocksize=4k --ioengine=libaio --fsync=1 --iodepth=1 --direct=1 --numjobs=1 --runtime=60 --group_reporting
+    fio --name TEST --eta-newline=2s --filename=fio-tempfile.dat --rw=randrw --size=500m --io_size=10g --blocksize=4k --ioengine=libaio --fsync=1 --iodepth=1 --direct=1 --numjobs=1 --runtime=60 --group_reporting --output=./logging/"$date"_fioQD1random4Krw_"$cpu".log
     rm fio-tempfile.dat
 }
 
@@ -78,13 +92,40 @@ qd1_random4K_readwrite () {
 #
 
 
-#############################################################################################################
+disk_compression_test () {
+    # test for differnces caused by disk compression, eveident on SSDs
+    echo disk compression test | tee -a ./logging/"$date"_diskCompressionTest_"$cpu".log
+    echo | tee -a ./logging/"$date"_diskCompressionTest_"$cpu".log
+    echo without predefined condition | tee -a ./logging/"$date"_diskCompressionTest_"$cpu".log 
+    fio --name TEST --eta-newline=1s --rw=randwrite --bs=128k --direct=1 --filename=fio-test-file.dat --size=500m --numjobs=1 --ioengine=libaio --iodepth=32 | grep -A 4 "write:" | tee -a ./logging/"$date"_diskCompressionTest_"$cpu".log
+    echo | tee -a ./logging/"$date"_diskCompressionTest_"$cpu".log
+    echo with zero buffers | tee -a ./logging/"$date"_diskCompressionTest_"$cpu".log
+    echo | tee -a ./logging/"$date"_diskCompressionTest_"$cpu".log
+    fio --name TEST --eta-newline=1s --rw=randwrite --bs=128k --direct=1 --filename=fio-test-file.dat --size=500m --numjobs=1 --ioengine=libaio --iodepth=32 --zero_buffers | grep -A 4 "write:" | tee -a ./logging/"$date"_diskCompressionTest_"$cpu".log
+    echo | tee -a ./logging/"$date"_diskCompressionTest_"$cpu".log
+    echo with refill buffers | tee -a ./logging/"$date"_diskCompressionTest_"$cpu".log
+    echo | tee -a ./logging/"$date"_diskCompressionTest_"$cpu".log
+    fio --name TEST --eta-newline=1s --rw=randwrite --bs=128k --direct=1 --filename=fio-test-file.dat --size=500m --numjobs=1 --ioengine=libaio --iodepth=32 --refill_buffers | grep -A 4 "write:" | tee -a ./logging/"$date"_diskCompressionTest_"$cpu".log
+    echo | tee -a ./logging/"$date"_diskCompressionTest_"$cpu".log
+    rm -f fio-test-file.dat
+}
+
 #
+# Fio verwendet grundsätzlich zufällige Daten. Um den Aufwand der Generierung der zufälligen Daten etwas zu mindern, wird zu Beginn ein Puffer von zufälligen Daten erstellt, auf den während des Tests laufend zurückgegriffen wird. Zumeist sollen sich aber auch diese zufälligen Daten komprimieren lassen.[1]
+# Diese Wiederverwendung des Puffers führt bei aktuellen SSDs (z.B. der Intel 520 Series SSDs) tatsächlich dazu, dass der SSD-Controller Daten komprimieren kann. Performance gleicht dann nahezu jener, wenn lauter Nullen als Daten verwendet werden - z.B. mittels Option "--zero_buffers".
+# Um diesen SSD Kompressions-Effekt zu umgehen, kann Fio mit "--refill_buffers" angewiesen werden, den Puffer bei jedem IO-Submit neu zu befüllen
 #
-#  MAIN
+
+############################################################
 #
+#   MAIN
 #
-#############################################################################################################
+############################################################
+
+# check for root permissions
+[ "$(id -u)" != "0" ] && { 
+	echo "root permissions are required to execute the script!" > /dev/stderr; exit 1;
+}
 
 
 case "$1" in
@@ -107,6 +148,10 @@ case "$1" in
     -rw|--qdrw)
         qd1_random4K_readwrite
         # more specific stress pattern, integer stressor for integer operations
+        ;;
+    -dc|--diskcompression)
+        disk_compression_test
+        # disk test to dtermine the compression capabilties of the device
         ;;
     *)
 		echo		
