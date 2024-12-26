@@ -42,7 +42,7 @@ cat << EOF
     -rw, --qdrw           Memory stress, mmap and vm stressors
 
 EOF
-exit
+# exit
 }
 
 qd32_bigblock_read () {
@@ -112,7 +112,7 @@ case "$1" in
 		echo		
 		echo "'$1' is an invalid argument!"
 		usage
-		# exit 2
+		exit 2
 		;;	           	
 esac
 

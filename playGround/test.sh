@@ -3,8 +3,13 @@
 cpu="$(dmidecode -t 4 | grep "Family:" | awk -F" " '{ printf $2"_"$3 }')"
 echo "$cpu"
 
+timeoutdefault="30"
+read -rp "Please enter the time period for the test to run in seconds [$timeoutdefault]: " timeout
+timeout="${timeout:-$timeoutdefault}"
+#timeout "$timeout" dd if=/dev/sda | pv -br | dd of=/dev/null 
+echo "$timeout"
 
-
+dd if=/dev/nvme0n1p2 | pv -br | dd of=/dev/null 
 
 #maxCountDefault="15000"
 #read -rp "number oc cycles to complete [$maxCountDefault]:  " maxCount
