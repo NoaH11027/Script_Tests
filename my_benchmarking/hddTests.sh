@@ -39,7 +39,7 @@ usage () {
 
 cat << EOF
  
-    Usage: $(basename "${BASH_SOURCE[0]}") [-h] [-u] [-qr] [-qw] [-mr] [-rw]
+    Usage: $(basename "${BASH_SOURCE[0]}") [-h] [-u] [-qr] [-qw] [-mr] [-rw] [-dc]
 
     Test script to measure memory read/write throughput utilizing fio.
 
@@ -50,10 +50,11 @@ cat << EOF
 
     System stress options
 
-    -qr, --qdread         CPU stress, basic stressors      
-    -qw, --qdwrite        CPU stress, matrix stressors
-    -mr, --qdmixed        CPU stress, integer stressors
-    -rw, --qdrw           Memory stress, mmap and vm stressors
+    -qr, --qdread         Sequential READ test, QD32 big blocks for 30 seconds      
+    -qw, --qdwrite        Sequentail WRITE test, QD32 big blocks for 30 seconds
+    -mr, --qdmixed        Random 4K READ test, QD1 small blocks for 30 seconds
+    -rw, --qdrw           Random 4K READ/WRITE test, QD1 small blocks for 30 seconds
+    -dc, --diskcomp       Determination for disk compression, three run test
 
 EOF
 # exit

@@ -2,13 +2,21 @@
 #
 ############################################################
 #
-# SSD Performance Measurement
+#      SSD Performance Measurement
 # 
-# Variante
+#      Variante
 #
-# 2024-12-26
+#      2024-12-26
 #
-# Mark Lüthke
+#      Mark Lüthke
+#
+############################################################
+#
+#      More simple test
+#
+#      Not fully developed yet
+#
+#      demidecode needs to be installed
 #
 ############################################################
 
