@@ -9,9 +9,13 @@
 ######
 
 #      VARIABLES
+#      implement fallback values
 ## 
 
-net1
+net1=1
+net2=1
+net3=1
+net4=1
 
 name="notebook"
 net="123.45.67."
